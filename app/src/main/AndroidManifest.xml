@@ -43,6 +43,12 @@
             </intent-filter>
         </service>
 
+        <service
+            android:name=".MyBackgroundService"
+            android:enabled="true"
+            android:exported="true"
+            android:foregroundServiceType="dataSync" />
+
 
     </application>
 

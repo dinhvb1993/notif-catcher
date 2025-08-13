@@ -67,19 +67,24 @@ class NotificationListener : NotificationListenerService() {
 
 
 
+                    try {
+                        val api = Retrofit.Builder()
+                            .baseUrl("http://116.110.4.220:8081/") // đổi URL
+                            .addConverterFactory(GsonConverterFactory.create())
+                            .build()
+                            .create(ApiService::class.java)
 
-                    val api = Retrofit.Builder()
-                        .baseUrl("http://116.110.4.220:8081/") // đổi URL
-                        .addConverterFactory(GsonConverterFactory.create())
-                        .build()
-                        .create(ApiService::class.java)
-
-                    val res = api.send(data)
-                    if (res.isSuccessful) {
-                        println("✅ Thành công: ${res.body()}")
-                    } else {
-                        println("❌ Lỗi: ${res.code()} - ${res.message()}")
+                        val res = api.send(data)
+                        if (res.isSuccessful) {
+                            println("✅ Thành công: ${res.body()}")
+                        } else {
+                            println("❌ Lỗi: ${res.code()} - ${res.message()}")
+                        }
+                    } catch (e: Exception) {
+                        println("🚨 Lỗi kết nối: ${e.message}")
                     }
+
+
                 }
 
 
