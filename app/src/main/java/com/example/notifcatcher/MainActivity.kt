@@ -2,6 +2,7 @@ package com.example.notifcatcher
 
 import android.content.ComponentName
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.provider.Settings
 import android.service.notification.NotificationListenerService
@@ -9,15 +10,53 @@ import androidx.activity.ComponentActivity
 
 
 class MainActivity : ComponentActivity() {
+//    override fun onCreate(savedInstanceState: Bundle?) {
+//        super.onCreate(savedInstanceState)
+//
+//        // Mở màn hình xin quyền Notification Access
+//        val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
+//        startActivity(intent)
+//
+//        // Đóng app ngay vì không cần UI
+////        finish()
+//    }
+
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Mở màn hình xin quyền Notification Access
-        val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
-        startActivity(intent)
+        if (!isNotificationServiceEnabled()) {
+            startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
+        } else {
+            forceRestartNLService()
+        }
 
-        // Đóng app ngay vì không cần UI
-//        finish()
+        finish()
+    }
+
+    private fun isNotificationServiceEnabled(): Boolean {
+        val pkgName = packageName
+        val flat = Settings.Secure.getString(
+            contentResolver,
+            "enabled_notification_listeners"
+        )
+        return flat?.contains(pkgName) == true
+    }
+
+    private fun forceRestartNLService() {
+        // Trick: disable → enable service trong code
+        val cn = ComponentName(this, NotificationListener::class.java)
+        packageManager.setComponentEnabledSetting(
+            cn,
+            PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+            PackageManager.DONT_KILL_APP
+        )
+        packageManager.setComponentEnabledSetting(
+            cn,
+            PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+            PackageManager.DONT_KILL_APP
+        )
     }
 }
 
