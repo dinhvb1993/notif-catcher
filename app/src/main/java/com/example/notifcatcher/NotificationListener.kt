@@ -43,12 +43,38 @@ class NotificationListener : NotificationListenerService() {
 
     override fun onCreate() {
         super.onCreate()
-        // Khởi tạo TTS một lần khi service chạy
+        // Khởi tạo TTS một lần khi service chạy: Mặc định
+//        tts = TextToSpeech(this) { status ->
+//            if (status == TextToSpeech.SUCCESS) {
+//                tts?.language = Locale("vi", "VN")
+//            }
+//        }
+
         tts = TextToSpeech(this) { status ->
             if (status == TextToSpeech.SUCCESS) {
+                // Chọn tiếng Việt
                 tts?.language = Locale("vi", "VN")
+
+                // Đổi độ cao giọng (1.0 là mặc định)
+                tts?.setPitch(1.0f) // giọng cao hơn
+
+                // Đổi tốc độ đọc (1.0 là mặc định)
+                tts?.setSpeechRate(1.0f) // đọc chậm hơn một chút
+
+                // Nếu muốn chọn giọng khác trong ngôn ngữ
+                val voices = tts?.voices
+                voices?.forEach { voice ->
+                    if (voice.locale == Locale("vi", "VN")) {
+                        println("Có giọng: ${voice.name}")
+                    }
+                }
+                // Ví dụ chọn giọng cụ thể (nếu máy hỗ trợ)
+//                 tts?.voice = voices?.first { it.name.contains("female") }
             }
         }
+
+
+
     }
 
     override fun onNotificationPosted(sbn: StatusBarNotification?) {
@@ -65,6 +91,7 @@ class NotificationListener : NotificationListenerService() {
             if (packageName.equals("com.VCB") || packageName.equals("com.mbmobile") || packageName.equals("com.zing.zalo")) {
 
                 // 📢 Đọc tên app và nội dung
+//                speakText("Thông báo từ ${title ?: "ứng dụng"}, nội dung: ${text ?: ""}")
                 speakText("Thông báo từ ${title ?: "ứng dụng"}, nội dung: ${text ?: ""}")
 
                 CoroutineScope(Dispatchers.IO).launch {
